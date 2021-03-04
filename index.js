@@ -1,4 +1,3 @@
-const { request, response } = require('express')
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
@@ -9,6 +8,21 @@ app.use(cors())
 morgan.token('body', function (req) { return JSON.stringify(req.body) })
 app.use(express.json())
 app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body'))
+
+let recommendations = [
+  {
+    id: 1,
+    content: "HTML is easy",
+    date: "2019-05-30T17:30:31.098Z",
+    important: true
+  },
+  {
+    id: 2,
+    content: "Browser can execute only Javascript",
+    date: "2019-05-30T18:39:34.091Z",
+    important: false
+  },
+]
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')

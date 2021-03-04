@@ -1,7 +1,7 @@
-GET http://localhost:3002/api/recommendations
+GET http://localhost:3001/api/recommendations
 
 ###
-POST http://localhost:3002/api/recommendations
+POST http://localhost:3001/api/recommendations
 Content-Type: application/json
 
 {
