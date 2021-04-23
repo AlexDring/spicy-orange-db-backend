@@ -3,6 +3,7 @@ GET http://localhost:3001/api/recommendations
 ###
 POST http://localhost:3001/api/recommendations
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2MDVjNjllZDI0YzhmYzI2ZjUxOTVlNzUiLCJpYXQiOjE2MTY2ODI4MzB9.stJ1mtWCJoJ-Nd40Yiwm0rMA77HX85nvHIVa7pdVEUE
 
 {
   "Title": "Witness",
@@ -49,5 +50,6 @@ Content-Type: application/json
       "score": 500,
       "user": "Dringer"
     }
-  ]
+  ],
+  "userId": "605c69ec24c8fc26f5195e74"
 }
