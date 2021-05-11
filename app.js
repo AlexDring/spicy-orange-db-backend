@@ -15,7 +15,7 @@ const mongoose = require('mongoose')
 const app = express()
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-  .then(result => {
+  .then(() => {
     logger.info('connected to MongoDB')
   })
   .catch((error) => {
@@ -24,6 +24,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology
 
 app.use(cors())
 app.use(express.json())
+app.use(middleware.tokenExtractor)
 
 app.use(morgan('tiny'))
 app.use(middleware.requestLogger)

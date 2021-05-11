@@ -25,6 +25,7 @@ recommendationsRouter.get('/:id', (request, response, next) => {
 
 const getTokenFrom = request => { // The helper function getTokenFrom isolates the token from the authorization header. 
   // console.log('request', request);
+  console.log(request);
   const authorization = request.get('authorization')
   console.log(authorization)
 
@@ -119,10 +120,67 @@ recommendationsRouter.put('/:id/rottengas/:voteid', (request, response) => {
     }).catch(error => console.log(error))
   })
 
-recommendationsRouter.delete('/:id', (request, response) => {
-  const id = Number(request.params.id)
-  recommendations = recommendations.filter(recommendation => recommendation.id !== id)
+recommendationsRouter.delete('/:id/rottengas/:voteId', async (request, response) => {
+  console.log(request.params.id);
+  let recommendation = await Recommendation.findById(request.params.id)
+  console.log(recommendation);
+  recommendation.rottenGas.remove(request.params.voteId)
+  await recommendation.save()
+  response.status(201).end()
+})
 
+recommendationsRouter.delete('/:id', async (request, response) => {
+  const mediaId = request.params.id
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
+  if(!request.token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' }) 
+  }
+
+  const user = await User.findById(decodedToken.id)
+  const recommendation = await Recommendation.findById(mediaId)
+
+  if(user._id.toString() === recommendation.user.toString()) {
+    await Recommendation.findByIdAndRemove(mediaId)
+    user.recommendations.remove(mediaId)
+    await user.save()
+    response.status(204).end()
+  } else {
+    console.log('No');
+    return response.status(401).json({ error: 'Can\'t delete an item that\'s been reviewed, added to a watchlist or marked as watched.' })
+  }
+})
+
+recommendationsRouter.post('/:id/watched', (request, response) => {
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
+  console.log(decodedToken);
+  if(!request.token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' }) 
+  }
+
+  User.findById(decodedToken.id)
+    .then(user => {
+      console.log(user);
+      user.watched.push(request.params.id)
+      user.save()
+      .then(res => response.json(res))
+      .catch(err => response.status(400).json('Error: ' + err))
+    })
+    .catch(err => response.status(400).json('Error: ' + err))
+})
+
+recommendationsRouter.delete('/:id/remove-watched', async (request, response) => {
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
+  if(!request.token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' }) 
+  }
+
+  const user = await User.findById(decodedToken.id)
+  user.watched.remove(request.params.id)
+
+  await user.save()
   response.status(204).end()
 })
 

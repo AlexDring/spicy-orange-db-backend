@@ -3,12 +3,13 @@ const usersRouter = require('express').Router()
 const User = require('../models/user')
 
 usersRouter.get('/', async (request, response) => {
-  const users = await User.find({}).populate('recommendations')
+  const users = await User.find({}).populate('recommendations watchlist.toWatch') // Write a populate thing!!2 on Typora
   response.json(users)
 })
 
 usersRouter.get('/:id', async (request, response) => {
   const user = await User.findById(request.params.id)
+  console.log(user);
   response.json(user)
 })
 
@@ -29,6 +30,11 @@ usersRouter.post('/', async (request, response) => {
   response.json(savedUser)
 })
 
+usersRouter.get('/:id/watchlist', async (request, response) => {
+  const user = await User.findById(request.params.id).populate('recommendations watchlist.toWatch') 
+  response.json(user)
+})
+
 usersRouter.post('/:id/watchlist', async (request, response) => {
   console.log(request.params);
   const body = request.body
@@ -41,16 +47,6 @@ usersRouter.post('/:id/watchlist', async (request, response) => {
         .catch(err => res.status(400).json('Error: ' + err))
     })
     .catch(err => res.status(400).json('Error: ' + err))
-  // const updatedUser = await User.findByIdAndUpdate(request.params.id, body)
-    // { id: request.params.id }, 
-    // { $addToSet: { watchlist: [] } } // Doesn't work because object added has to be exact, the date field would be different each time so a new item would get pushed to the array
-
-    // {_id: request.params.id, 'watchlist.toWatch': {$ne: body.toWatch}}, 
-    // {$push: {
-    //   watchlist: body
-    // }}
-
-  // response.json(updatedUser)
 })
 
 usersRouter.delete('/:id/watchlist/:watchlistId', async (request, response) => {
@@ -59,10 +55,33 @@ usersRouter.delete('/:id/watchlist/:watchlistId', async (request, response) => {
       user.watchlist.remove(request.params.watchlistId)
       
       user.save()
-      .then(res => response.json('Deleted'))
+      .then(res => response.json(res))
       .catch(err => res.status(400).json('Error: ' + err))
    })
    .catch(err => res.status(400).json('Error: ' + err))
+})
+
+// usersRouter.post('/:id/mark-as-watched', async (request, response) => {
+//   console.log(request.params);
+//   const body = request.body
+//   User.findById(request.params.id)
+//     .then(user => {
+//       user.watched.push(body)
+
+//       user.save()
+//         .then(savedUser => response.json(savedUser))
+//         .catch(err => res.status(400).json('Error: ' + err))
+//     })
+//     .catch(err => res.status(400).json('Error: ' + err))
+// })
+usersRouter.post('/:id/:mediaId/mark-as-watched', async (request, response) => {
+  const user = request.params.id
+  const media = request.params.mediaId
+  User.findById(user).then(user => {
+      user.watchlist.push(media)
+      console.log(user);
+      user.save()
+    })
 })
 
 module.exports = usersRouter
